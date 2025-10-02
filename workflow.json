@@ -1,0 +1,554 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "apify url here",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"count\": 100,\n    \"scrapeCompany\": true,\n    \"urls\": [\n        \"https://www.linkedin.com/jobs/search/?currentJobId=4304304337&f_TPR=r8600&geoId=101022442&keywords=react%20js&origin=JOB_SEARCH_PAGE_KEYWORD_AUTOCOMPLETE&originalSubdomain=pk&refresh=true\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1712,
+        -16
+      ],
+      "id": "4806e823-0fca-4bc7-9db3-003a1ea2c666",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "777eab4a-88e0-4c39-9274-1b97fc2fa18f",
+              "leftValue": "={{JSON.parse($json.message.content).relevant}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -912,
+        -160
+      ],
+      "id": "3eb418e6-15f1-40e3-8b00-ea0f9b28e74e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "name": "SplitInBatches",
+      "position": [
+        -1488,
+        -16
+      ],
+      "id": "1233debf-a0c3-49fb-a220-e81bb2cb8037",
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        -96
+      ],
+      "id": "d69ef055-3bcb-4f56-8aea-911bf933bf6b",
+      "name": "Wait",
+      "webhookId": "3e0f0500-5041-4467-ab82-d915fb95867f"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a hyper-efficient AI assistant acting as a Senior Technical Recruiter and Job-Matching Specialist. Your sole mission is to analyze a job description against a candidate's skill set and determine if the job is a relevant opportunity for the candidate. You must base your decision solely on the information provided.\n\nCandidate Profile:\n3 year of experince in Frontend Development with strong knowledge in these \nCore Skills: React.js, Next.js, Node.js, JavaScript (ES6+), TypeScript\n\nBackend & Database: Express, MongoDB, Firebase, Supabase\n\nFrontend & UI: HTML5, CSS, Tailwind CSS, Bootstrap, Material-UI, Shadcn UI\n\nDevOps & Tooling: Docker, CI/CD (Git), n8n\n\nJob Listing to Analyze:\n\nCompany Name: {{$json.companyName}}\n\nJob Description: {{ $json.descriptionText }}\n\nYour Task & Rules:\n\nAnalyze Core Skills: Scrutinize the job description. A job is considered relevant only if it explicitly requires or strongly implies the use of React.js or Next.js, combined with Node.js, JavaScript, or TypeScript. A match on at least two of these core skills is mandatory for a true result.\n\nEvaluate the Stack: Assess the overlap with the candidate's secondary skills (databases, UI frameworks, DevOps tools). A high degree of overlap strengthens the relevance, but the absence of a few is acceptable.\n\nIdentify Deal-Breakers: The job is irrelevant (\"relevant\": false) if:\n\nThe primary technology is fundamentally different (e.g., the role is for a Python/Django, Java/Spring, Ruby on Rails, or .NET developer).\n\nThe role explicitly requires deep expertise in 3 or more technologies not listed in the candidate's skills.\n\nFormat the Output: Your response MUST be a single, raw JSON object. Do not include any introductory text, explanations, apologies, or markdown formatting like json.\nif relevant == true write a email for apply if not true keep the jobDescription,emailBody and emailSubject empty string\nJSON Output Format:\n{\"relevant\": boolean, \"companyName\": \"string\", \"jobDescription\": \"string\",\"jobTitle\":\"string\",\"companyEmail:\"string\",\"emailBody\":\"string\",\"emailSubject\":\"string\"}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1264,
+        -160
+      ],
+      "id": "d6301808-fefa-4d8b-b86a-42af5eaaf394",
+      "name": "Validator",
+      "credentials": {
+        "openAiApi": {
+          "id": "your_api_key",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "your document Id here"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -1936,
+        -16
+      ],
+      "id": "a1d46673-3a7c-4fff-960c-da44760dc81f",
+      "name": "Get Original Resume",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "your_api_key",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "93272931-828d-44df-b41d-ed9c8b06fa1e",
+              "leftValue": "={{JSON.parse($json.message.content).relevant}}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "37c2931e-398d-4eb3-ace5-585b14ceaecc",
+              "leftValue": "={{JSON.parse($json.message.content).jobDescription}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1280,
+        240
+      ],
+      "id": "b217e801-1a18-42ac-8d7f-ec58368011bf",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an elite, certified professional resume writer and career strategist. Your sole purpose is to transform a candidate's existing resume into a high-impact, ATS-optimized document tailored specifically for a target job description. You will operate with surgical precision, using only the information provided.\n\n//-- INPUTS --//\n\nTarget Job Description:\n{{ $('Validator').item.json.message.content.parseJson().jobDescription }}\n\nCandidate's Original Resume Content: \n\"Yor reume content.\" Use plausible, professional-sounding metrics if none are provided.\n\nAction Verbs: Start every bullet point with a powerful action verb (e.g., Architected, Implemented, Optimized, Spearheaded, Managed, Reduced, Increased).\n\nSkills Section: Curate the skills list to highlight technologies and methodologies mentioned in the job description first. Categorize for readability (e.g., Languages, Frameworks & Libraries, Databases, Tools).\n\nStep 4: Finalize and Format\n\nEnsure the entire resume maintains a professional, consistent, and clean tone.\n\nFormat the final output as clean, single-column Markdown suitable for Google Docs import. Use standard Markdown for headers (#, ##), bullet points (* or -), bold (**text**), and italics (*text*).\n\n//-- ABSOLUTE CONSTRAINTS & OUTPUT FORMAT --//\n\nNO FABRICATION: You must NEVER invent skills, job titles, or experiences not present in the original candidate resume. Your role is to rephrase and optimize, not to create fiction.\n\nCLIENT-READY OUTPUT: The generated resume is final. DO NOT include any notes, comments, placeholders (e.g., [Insert metric here]), or suggestions for the candidate.\n\nNO CONVERSATION: Your response must not contain any conversational text, introductions, or explanations.\n\n JSON Output Format:\n{\"resume\": \"the makdown resume\" }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1056,
+        240
+      ],
+      "id": "7bbde203-a742-4c4c-abf1-e4cdf85976cf",
+      "name": "Resume Writer",
+      "credentials": {
+        "openAiApi": {
+          "id": "RbUXfhMNH0cpIU02",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "Your_folder_id",
+        "title": "=Your Name - {{ $('Filter').item.json.message.content.parseJson().companyName }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        240
+      ],
+      "id": "25a91fe9-8b20-4f51-a258-ee7e580f44f3",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "your_api_key",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{  $json.message.content.parseJson().resume}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        240
+      ],
+      "id": "6db8b1e0-f1b3-4131-b1a8-8c445d8f5421",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/upload/drive/v3/files/{{ $json.id}}?uploadtype=media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Content-Type\":\"text/html\"\n}",
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ $('Markdown').item.json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -256,
+        240
+      ],
+      "id": "e8c4ec3a-0a82-408f-bae7-3035d2953175",
+      "name": "HTTP Request1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "your_api_key",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your_sheet_id",
+          "mode": "list",
+          "cachedResultName": "Job Lists",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your_sheet_id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/your_sheet_id/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "jobTitle": "={{ $json.message.content.parseJson().jobTitle }}",
+            "companyName": "={{ $json.message.content.parseJson().companyName }}",
+            "jobDescription": "={{ $json.message.content.parseJson().jobDescription }}",
+            "companyEmail": "={{ $json.message.content.parseJson().companyEmail }}",
+            "emailSubject": "={{ $json.message.content.parseJson().emailSubject }}",
+            "emailBody": "={{ $json.message.content.parseJson().emailBody }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "jobTitle",
+              "displayName": "jobTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyName",
+              "displayName": "companyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "jobDescription",
+              "displayName": "jobDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "companyEmail",
+              "displayName": "companyEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailSubject",
+              "displayName": "emailSubject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "emailBody",
+              "displayName": "emailBody",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        -160
+      ],
+      "id": "e5a46242-5676-4a90-a62f-02152835717c",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3ZmEilxBDZrAxMpZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2176,
+        -16
+      ],
+      "id": "b9331aa3-8280-4581-ac34-257333fac12d",
+      "name": "3 hours Trigger"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validator": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Original Resume": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Resume Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Writer": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3 hours Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Original Resume",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "Your_Instance_ID"
+  }
+}
